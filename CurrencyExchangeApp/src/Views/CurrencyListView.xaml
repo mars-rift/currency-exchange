@@ -1,0 +1,52 @@
+
+<Window x:Class="CurrencyExchangeApp.Views.CurrencyListView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="clr-namespace:CurrencyExchangeApp.ViewModels"
+        Title="Currency List" Height="450" Width="800">
+    <Grid>
+        <StackPanel Margin="10">
+            <Grid Width="300" Margin="0,0,0,10">
+                <TextBox x:Name="SearchBox" 
+                         Text="{Binding SearchTerm, UpdateSourceTrigger=PropertyChanged}"/>
+                <TextBlock IsHitTestVisible="False" 
+                           Text="Search currencies..." 
+                           VerticalAlignment="Center" 
+                           HorizontalAlignment="Left" 
+                           Margin="5,0,0,0" 
+                           Foreground="Gray">
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Text, ElementName=SearchBox}" Value="">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
+            </Grid>
+            <Button Content="Refresh" 
+                    Command="{Binding RefreshCommand}" 
+                    Width="100" 
+                    Margin="0,0,0,10"/>
+            <ComboBox x:Name="SortComboBox" 
+                      Width="200" 
+                      Margin="0,0,0,10" 
+                      SelectedItem="{Binding SelectedSortOption}">
+                <ComboBoxItem Content="Sort by Code" />
+                <ComboBoxItem Content="Sort by Name" />
+            </ComboBox>
+            <ListView ItemsSource="{Binding FilteredCurrencies}">
+                <ListView.View>
+                    <GridView>
+                        <GridViewColumn Header="Code" DisplayMemberBinding="{Binding Code}" Width="100"/>
+                        <GridViewColumn Header="Name" DisplayMemberBinding="{Binding Name}" Width="300"/>
+                        <GridViewColumn Header="Price (USD)" DisplayMemberBinding="{Binding Price}" Width="100"/>
+                    </GridView>
+                </ListView.View>
+            </ListView>
+        </StackPanel>
+    </Grid>
+</Window>
