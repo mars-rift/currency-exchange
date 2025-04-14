@@ -33,7 +33,7 @@ namespace CurrencyExchangeApp.Services
 
             // If no cached data, refresh from API
             await RefreshDataAsync();
-            return _cachedCurrencies;
+            return _cachedCurrencies ?? new List<Currency>();
         }
 
         /// <summary>

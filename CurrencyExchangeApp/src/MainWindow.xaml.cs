@@ -6,7 +6,7 @@ namespace CurrencyExchangeApp
 {
     public partial class MainWindow : Window
     {
-        private MainViewModel ViewModel => DataContext as MainViewModel;
+        private MainViewModel? ViewModel => DataContext as MainViewModel;
 
         public MainWindow()
         {
@@ -33,7 +33,7 @@ namespace CurrencyExchangeApp
             {
                 // Get the content of the selected ComboBoxItem
                 var selectedItem = SortComboBox.SelectedItem as ComboBoxItem;
-                string sortOption = selectedItem?.Content?.ToString();
+                string? sortOption = selectedItem?.Content?.ToString();
                 if (!string.IsNullOrEmpty(sortOption))
                 {
                     ViewModel.SortCommand.Execute(sortOption);

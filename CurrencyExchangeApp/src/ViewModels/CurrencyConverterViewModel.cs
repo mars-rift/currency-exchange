@@ -9,8 +9,8 @@ namespace CurrencyExchangeApp.ViewModels
     public class CurrencyConverterViewModel : BaseViewModel
     {
         private decimal _amountToConvert;
-        private string _selectedFromCurrency;
-        private string _selectedToCurrency;
+        private string _selectedFromCurrency = string.Empty; // Initialize to avoid nullability warnings
+        private string _selectedToCurrency = string.Empty;   // Initialize to avoid nullability warnings
         private decimal _convertedAmount;
 
         public decimal AmountToConvert
