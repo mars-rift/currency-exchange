@@ -34,10 +34,7 @@ namespace CurrencyExchangeApp.Views
             }
         }
 
-        private void RefreshButton_Click(object sender, RoutedEventArgs e)
-        {
-            _viewModel.RefreshData();
-        }
+       
 
         private void CurrencyListView_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {

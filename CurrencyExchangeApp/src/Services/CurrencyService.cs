@@ -12,26 +12,46 @@ namespace CurrencyExchangeApp.Services
     {
         private readonly HttpClient _httpClient;
         private bool _disposed = false;
-        private List<Currency> _cachedCurrencies = new List<Currency>(); // Initialize to fix CS8618
+        private List<Currency> _cachedCurrencies = new List<Currency>();
 
         public CurrencyService()
         {
             _httpClient = new HttpClient();
-            _httpClient.Timeout = TimeSpan.FromSeconds(15); // Set a reasonable timeout
+            _httpClient.Timeout = TimeSpan.FromSeconds(15);
         }
 
-        // Implement the ICurrencyService interface directly - no explicit implementation
+        /// <summary>
+        /// Fetches a list of all available currencies with their current prices
+        /// </summary>
         public async Task<List<Currency>> GetCurrenciesAsync()
         {
+            // Check cache first
             if (_cachedCurrencies != null && _cachedCurrencies.Any())
             {
                 return _cachedCurrencies;
             }
 
-            await RefreshDataAsync(); // Changed to match return type
+            // If no cached data, refresh from API
+            await RefreshDataAsync();
             return _cachedCurrencies;
         }
 
+        /// <summary>
+        /// Gets currencies with an option to force refresh from the API
+        /// </summary>
+        /// <param name="forceRefresh">If true, forces a refresh from the API even if cached data exists</param>
+        public async Task<List<Currency>> GetCurrenciesWithRefreshAsync(bool forceRefresh)
+        {
+            if (forceRefresh)
+            {
+                await RefreshDataAsync();
+            }
+            return _cachedCurrencies.Any() ? _cachedCurrencies : await GetCurrenciesAsync();
+        }
+
+        /// <summary>
+        /// Converts an amount from one currency to another
+        /// </summary>
         public async Task<decimal> ConvertCurrencyAsync(string fromCurrency, string toCurrency, decimal amount)
         {
             if (string.IsNullOrEmpty(fromCurrency))
@@ -56,11 +76,15 @@ namespace CurrencyExchangeApp.Services
             return usdAmount * prices[toCurrency.ToLower()];
         }
 
-        // Changed to return Task instead of Task<List<Currency>> to match interface
+        /// <summary>
+        /// Refreshes the currency data from the API
+        /// </summary>
         public async Task RefreshDataAsync()
         {
             try
             {
+                System.Diagnostics.Debug.WriteLine("RefreshDataAsync called at " + DateTime.Now);
+
                 var currencies = await FetchCurrencyData();
                 var prices = await FetchCurrencyPrices();
 
@@ -80,15 +104,17 @@ namespace CurrencyExchangeApp.Services
                     Name = c.Value,
                     Price = prices.TryGetValue(c.Key, out decimal value) ? value : 0
                 }).ToList();
+
+                System.Diagnostics.Debug.WriteLine($"Refreshed {_cachedCurrencies.Count} currencies");
             }
             catch (Exception ex)
             {
-                // Log the exception details here
+                System.Diagnostics.Debug.WriteLine($"Error in RefreshDataAsync: {ex.Message}");
                 throw new Exception($"Error retrieving currency data: {ex.Message}", ex);
             }
         }
 
-        private async Task<Dictionary<string, string>?> FetchCurrencyData() // Changed return type to nullable
+        private async Task<Dictionary<string, string>?> FetchCurrencyData()
         {
             try
             {
@@ -117,7 +143,7 @@ namespace CurrencyExchangeApp.Services
                 "https://latest.currency-api.pages.dev/v1/currencies/usd.json"
             };
 
-            Exception? lastException = null; // Added ? to make nullable
+            Exception? lastException = null;
 
             foreach (var endpoint in endpoints)
             {

@@ -48,7 +48,7 @@ namespace CurrencyExchangeApp.ViewModels
         public ICommand SearchCommand { get; }
         public ICommand SortCommand { get; }
         public ICommand ExportCommand { get; }
-
+        public ICommand RefreshCommand { get; }
         public MainViewModel() : this(new CurrencyService())
         {
         }
@@ -62,14 +62,45 @@ namespace CurrencyExchangeApp.ViewModels
             SearchCommand = new RelayCommand<string>(Search);
             SortCommand = new RelayCommand<string>(Sort);
             ExportCommand = new RelayCommand(ExportData, () => FilteredCurrencies.Any());
-
+            RefreshCommand = new RelayCommand(RefreshData);
             Task.Run(() => LoadDataAsync());
         }
 
         public async void RefreshData()
         {
-            await LoadDataAsync();
+            try
+            {
+                IsLoading = true;
+                ErrorMessage = string.Empty;
+
+                System.Diagnostics.Debug.WriteLine("MainViewModel.RefreshData called");
+
+                // Force refresh by calling RefreshDataAsync directly
+                await _currencyService.RefreshDataAsync();
+
+                // Now get the refreshed data
+                var currencyData = await _currencyService.GetCurrenciesAsync();
+
+                _allCurrencies.Clear();
+                foreach (var currency in currencyData)
+                {
+                    _allCurrencies.Add(currency);
+                }
+
+                ApplyFilterAndSort();
+                System.Diagnostics.Debug.WriteLine($"Refresh complete, loaded {_allCurrencies.Count} currencies");
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error in RefreshData: {ex.Message}");
+                ErrorMessage = $"Error refreshing data: {ex.Message}";
+            }
+            finally
+            {
+                IsLoading = false;
+            }
         }
+
 
         private async Task LoadDataAsync()
         {
